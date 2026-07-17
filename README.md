@@ -1,11 +1,11 @@
-# TaskFlow-API
+# TaskFlow API
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)
 ![Swagger UI](https://img.shields.io/badge/Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-A RESTful Task Management API built with **Node.js** and **Express.js** that supports full CRUD (Create, Read, Update, Delete) operations on an in-memory task list. The project demonstrates REST API fundamentals, HTTP methods, status codes, request validation, and interactive API documentation using **Swagger UI**.
+A RESTful Task API built with **Node.js** and **Express.js** that supports full CRUD (Create, Read, Update, Delete) operations on an in-memory task list. The project demonstrates REST API fundamentals, HTTP methods, status codes, request validation, and interactive API documentation using **Swagger UI**.
 
 
 ## Table of Contents
@@ -18,6 +18,7 @@ A RESTful Task Management API built with **Node.js** and **Express.js** that sup
 - [Swagger UI](#swagger-ui)
 - [Project Structure](#project-structure)
 - [HTTP Status Codes](#http-status-codes)
+- [AI Rematch](#ai-rematch)
 - [Author](#author)
 
 
@@ -60,6 +61,7 @@ cd TaskFlow-API
 ```bash
 npm install
 ```
+Install all required project dependencies.
 
 ### 4. Start the server
 
@@ -79,8 +81,7 @@ Open Swagger UI at:
 http://localhost:3000/docs
 ```
 
-**Repository:**  
-**[TaskFlow-API](https://github.com/jaweriawaheed19/TaskFlow-API)**
+Repository: **https://github.com/jaweriawaheed19/TaskFlow-API**
 
 
 ## API Endpoints
@@ -104,7 +105,7 @@ The following command creates a new task.
 curl -i -X POST http://localhost:3000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Buy milk\"}"
 ```
 
-Example response:
+Successful Response:
 
 ```http
 HTTP/1.1 201 Created
@@ -143,9 +144,8 @@ The following screenshot demonstrates creating a new task using Swagger UI's **T
 
 ```text
 TaskFlow-API/
+├── ai-version/
 ├── screenshots/
-│   ├── swagger-ui-overview.png
-│   └── swagger-post-success.png
 ├── openapi.json
 ├── package.json
 ├── package-lock.json
@@ -164,6 +164,165 @@ TaskFlow-API/
 | **204 No Content** | A task was deleted successfully |
 | **400 Bad Request** | The request was invalid (e.g., missing title or no fields to update) |
 | **404 Not Found** | The requested task does not exist |
+
+
+## AI Rematch
+
+To evaluate how well AI could generate the same backend application, I wrote my own prompt and asked an AI assistant to build the Task API from scratch. The AI-generated implementation was kept in a separate `ai-version/` folder so that my original hand-built implementation remained unchanged.
+
+
+## Original Prompt
+
+```text
+Build a RESTful Task Management API using Node.js and Express.js.
+
+Requirements:
+
+- Store tasks in an in-memory array (no database or file storage).
+- Each task should have:
+  - id (integer)
+  - title (string)
+  - done (boolean)
+
+Implement the following endpoints:
+
+1. GET /
+   - Return API information including name, version, and available endpoints.
+
+2. GET /health
+   - Return a JSON response indicating the server is running.
+
+3. GET /tasks
+   - Return all tasks.
+
+4. GET /tasks/:id
+   - Return the requested task.
+   - If the task does not exist, return:
+     - HTTP 404
+     - JSON: { "error": "Task <id> not found" }
+
+5. POST /tasks
+   - Create a new task.
+   - The request body must contain a non-empty "title".
+   - New tasks should default to done: false.
+   - Return HTTP 201.
+   - If title is missing or empty, return HTTP 400 with a JSON error.
+
+6. PUT /tasks/:id
+   - Allow updating title and/or done.
+   - Return HTTP 200 with the updated task.
+   - Return HTTP 400 if no valid fields are provided.
+   - Return HTTP 404 if the task does not exist.
+
+7. DELETE /tasks/:id
+   - Delete a task.
+   - Return HTTP 204.
+   - Return HTTP 404 if the task does not exist.
+
+Additional requirements:
+
+- Use express.json().
+- Use proper REST API status codes.
+- Return JSON responses only.
+- Create an OpenAPI 3.0 specification.
+- Serve Swagger UI at /docs using swagger-ui-express.
+- Organize the code clearly and keep it beginner-friendly.
+```
+
+
+## AI vs Me
+
+### What the AI Did Better
+
+- Generated a modular project structure by separating routing, data storage, and server configuration into multiple files, improving maintainability and scalability.
+- Created a more detailed OpenAPI specification with reusable schemas and better endpoint organization, resulting in a cleaner Swagger UI.
+- Used `process.env.PORT || 3000`, allowing the server to run on different ports without modifying the source code.
+- Added extra information such as `uptime` and `timestamp` to the `/health` endpoint.
+
+### What the AI Got Wrong or Quietly Ignored
+
+- Renamed the API from **Task API** to **Task Management API**, even though my prompt did not ask for a different name.
+- Returned additional fields (`uptime` and `timestamp`) in the `/health` endpoint instead of the simple `{ "status": "ok" }` response used in my implementation.
+- Initialized the API with a different set of sample tasks. Since my prompt only specified having an in-memory task list and did not define the exact sample data, the AI made its own assumptions.
+- Added implementation details and extra features that were not explicitly requested, making the solution different from the intended minimal specification.
+
+### What My Prompt Forgot to Specify
+
+While comparing both implementations, I realized that my prompt left several implementation details open to interpretation:
+
+- The exact API name.
+- The exact response format for the `/health` endpoint.
+- Whether the project should use a single-file or modular structure.
+- The exact sample task data.
+- The desired level of detail for the OpenAPI documentation.
+
+Because these details were not specified, the AI made reasonable implementation decisions that differed from my hand-built version.
+
+
+## Improved Prompt
+
+```text
+Build a RESTful Task API using Node.js and Express.js.
+
+Requirements:
+
+General
+- Name the API exactly "Task API".
+- Keep the implementation beginner-friendly.
+- Store tasks in an in-memory array only. Do not use a database or file storage.
+- Initialize the API with exactly three sample tasks.
+- Use express.json() middleware.
+- Return JSON responses only.
+
+Endpoints
+
+GET /
+- Return the API name, version and available endpoints.
+
+GET /health
+- Return exactly:
+{
+  "status": "ok"
+}
+
+GET /tasks
+- Return all tasks.
+- Status code: 200.
+
+GET /tasks/:id
+- Return the requested task.
+- If the task does not exist, return HTTP 404 with:
+{
+  "error": "Task <id> not found"
+}
+
+POST /tasks
+- Accept a JSON body containing a non-empty "title".
+- New tasks must default to done: false.
+- Return HTTP 201.
+- Missing or empty title must return HTTP 400 with a JSON error.
+
+PUT /tasks/:id
+- Allow updating title and/or done.
+- Return HTTP 200 with the updated task.
+- Return HTTP 400 if no valid fields are supplied.
+- Return HTTP 404 if the task does not exist.
+
+DELETE /tasks/:id
+- Delete the requested task.
+- Return HTTP 204.
+- Return HTTP 404 if the task does not exist.
+
+Swagger
+- Create an OpenAPI 3.0 specification.
+- Serve Swagger UI at /docs using swagger-ui-express.
+- Keep the implementation close to the requested functionality without adding extra response fields or unnecessary features.
+```
+
+
+## Rematch Result
+
+This exercise demonstrated that AI-generated code is only as good as the specification it receives. Building the project manually first allowed me to review the generated code critically, identify AI assumptions, and improve my prompt to produce a solution that more closely matched my intended implementation.
 
 
 ## Author
