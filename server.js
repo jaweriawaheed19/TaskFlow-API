@@ -83,14 +83,6 @@ app.put("/tasks/:id", (req, res) => {
 
     const id = Number(req.params.id);
 
-    const task = tasks.find(task => task.id === id);
-
-    if (!task) {
-        return res.status(404).json({
-            error: `Task ${id} not found`
-        });
-    }
-
     const { title, done } = req.body;
 
     if (title === undefined && done === undefined) {
@@ -99,15 +91,30 @@ app.put("/tasks/:id", (req, res) => {
         });
     }
 
-    if (title !== undefined) {
-        task.title = title;
+    const existingTask = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(id);
+
+    if (!existingTask) {
+        return res.status(404).json({
+            error: "Task not found"
+        });
     }
 
-    if (done !== undefined) {
-        task.done = done;
-    }
+    const updatedTitle = title !== undefined ? title : existingTask.title;
+    const updatedDone = done !== undefined ? done : existingTask.done;
 
-    res.json(task);
+    db.prepare(`
+        UPDATE tasks
+        SET title = ?, done = ?
+        WHERE id = ?
+    `).run(updatedTitle, updatedDone, id);
+
+    const updatedTask = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(id);
+
+    res.json(updatedTask);
 
 });
 
@@ -115,17 +122,17 @@ app.delete("/tasks/:id", (req, res) => {
 
     const id = Number(req.params.id);
 
-    const task = tasks.find(task => task.id === id);
+    const task = db
+        .prepare("SELECT * FROM tasks WHERE id = ?")
+        .get(id);
 
     if (!task) {
         return res.status(404).json({
-            error: `Task ${id} not found`
+            error: "Task not found"
         });
     }
 
-    const index = tasks.findIndex(task => task.id === id);
-
-    tasks.splice(index, 1);
+    db.prepare("DELETE FROM tasks WHERE id = ?").run(id);
 
     res.sendStatus(204);
 
