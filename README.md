@@ -2,10 +2,11 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)
 ![Swagger UI](https://img.shields.io/badge/Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-A RESTful Task API built with **Node.js** and **Express.js** that supports full CRUD (Create, Read, Update, Delete) operations on an in-memory task list. The project demonstrates REST API fundamentals, HTTP methods, status codes, request validation, and interactive API documentation using **Swagger UI**.
+A RESTful Task API built with **Node.js**, **Express.js**, and **SQLite** that supports full CRUD (Create, Read, Update, Delete) operations with persistent database storage. The project demonstrates REST API fundamentals, SQL queries, HTTP methods, request validation, and interactive API documentation using **Swagger UI**.
 
 
 ## Table of Contents
@@ -13,6 +14,7 @@ A RESTful Task API built with **Node.js** and **Express.js** that supports full 
 - [Features](#features)
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
+- [Database](#database)
 - [API Endpoints](#api-endpoints)
 - [Example curl Request](#example-curl-request)
 - [Swagger UI](#swagger-ui)
@@ -26,7 +28,11 @@ A RESTful Task API built with **Node.js** and **Express.js** that supports full 
 
 - Full CRUD (Create, Read, Update, Delete) operations
 - RESTful API endpoints
-- In-memory task storage (no database)
+- SQLite database for persistent task storage
+- Automatic database and table creation
+- Automatic seeding of **three** example tasks
+- SQL-based CRUD operations
+- Data persists after server restarts
 - JSON request and response handling
 - Input validation with proper error handling
 - Interactive API documentation using Swagger UI
@@ -37,9 +43,11 @@ A RESTful Task API built with **Node.js** and **Express.js** that supports full 
 
 - **Node.js** – JavaScript runtime environment
 - **Express.js** – Backend web framework
-- **Swagger UI Express** – Interactive API documentation
-- **OpenAPI 3.0** – API specification
 - **JavaScript (ES6)** – Programming language
+- **SQLite** – Lightweight embedded SQL database
+- **better-sqlite3** – SQLite driver for Node.js
+- **OpenAPI 3.0** – API specification
+- **Swagger UI Express** – Interactive API documentation
 
 
 ## Installation
@@ -61,7 +69,8 @@ cd TaskFlow-API
 ```bash
 npm install
 ```
-Install all required project dependencies.
+
+This installs all required project dependencies, including **better-sqlite3**.
 
 ### 4. Start the server
 
@@ -69,19 +78,57 @@ Install all required project dependencies.
 npm start
 ```
 
-The server will start at:
+On first startup the application automatically:
+
+- Creates `tasks.db`
+- Creates the `tasks` table if it does not already exist
+- Seeds three example tasks if the database is empty
+
+The server starts on:
 
 ```text
 http://localhost:3000
 ```
 
-Open Swagger UI at:
+Swagger UI is available at:
 
 ```text
 http://localhost:3000/docs
 ```
 
-Repository: **https://github.com/jaweriawaheed19/TaskFlow-API**
+Repository:
+
+```text
+https://github.com/jaweriawaheed19/TaskFlow-API
+```
+
+## Database
+
+The project uses **SQLite** because it is lightweight, serverless, requires zero configuration, and stores all data in a single file. Unlike the previous in-memory implementation, data now persists even after the server restarts.
+
+### Database File
+
+- The database file is named `tasks.db`.
+- It is created automatically the first time the application starts.
+- The application automatically creates the `tasks` table if it does not already exist.
+- Three example tasks are seeded only when the table is empty.
+- The database file is typically added to `.gitignore` so each new clone starts with a fresh database that is created automatically.
+
+## SQLite Database
+
+The screenshot below shows the project database opened in **DB Browser for SQLite**.
+
+![SQLite Database](screenshots/sqlite-db-browser.png)
+
+## Example SQL Query
+
+The following query was executed during Stage 4 to display all completed tasks.
+
+```sql
+SELECT * FROM tasks WHERE done = 1;
+```
+
+**Result:** The query returned every task whose `done` value was `1`, allowing only completed tasks to be displayed.
 
 
 ## API Endpoints
@@ -146,13 +193,19 @@ The following screenshot demonstrates creating a new task using Swagger UI's **T
 TaskFlow-API/
 ├── ai-version/
 ├── screenshots/
+│   ├── sqlite-db-browser.png
+│   ├── swagger-post-success.png
+│   └── swagger-ui-overview.png
+├── database.js
 ├── openapi.json
 ├── package.json
 ├── package-lock.json
 ├── server.js
 ├── .gitignore
-└── README.md
+├── README.md
+└── tasks.db (created automatically)
 ```
+> *`tasks.db` is created automatically when the application starts and is usually ignored by Git.*
 
 
 ## HTTP Status Codes
