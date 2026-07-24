@@ -118,7 +118,7 @@ The project uses **SQLite** because it is lightweight, serverless, requires zero
 
 The screenshot below shows the project database opened in **DB Browser for SQLite**.
 
-![SQLite Database](screenshots/sqlite-db-browser.png)
+![SQLite Database](screenshots/sqlite-browser.png)
 
 ## Example SQL Query
 
