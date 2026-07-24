@@ -62,13 +62,18 @@ app.post("/tasks", (req, res) => {
         });
     }
 
-    const newTask = {
-        id: tasks.length + 1,
-        title: title,
-        done: false
-    };
+    const result = db
+        .prepare(`
+            INSERT INTO tasks (title, done)
+            VALUES (?, ?)
+        `)
+        .run(title, 0);
 
-    tasks.push(newTask);
+    const newTask = {
+        id: result.lastInsertRowid,
+        title: title,
+        done: 0
+    };
 
     res.status(201).json(newTask);
 
