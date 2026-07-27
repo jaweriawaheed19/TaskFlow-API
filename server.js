@@ -4,7 +4,7 @@ const swaggerUi = require("swagger-ui-express");
 
 const swaggerDocument = require("./openapi.json");
 
-const db = require("./database");
+const { initializeDatabase } = require("./database");
 
 const app = express();
 
@@ -140,6 +140,12 @@ app.delete("/tasks/:id", (req, res) => {
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+initializeDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Database initialization failed:", err);
+  });
