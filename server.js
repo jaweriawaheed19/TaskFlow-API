@@ -4,7 +4,7 @@ const swaggerUi = require("swagger-ui-express");
 
 const swaggerDocument = require("./openapi.json");
 
-const { initializeDatabase } = require("./database");
+const { pool, initializeDatabase } = require("./database");
 
 const app = express();
 
@@ -26,30 +26,39 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.get("/tasks", (req, res) => {
+app.get("/tasks", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM tasks");
 
-    const tasks = db.prepare("SELECT * FROM tasks").all();
-
-    res.json(tasks);
-
-});
-
-app.get("/tasks/:id", (req, res) => {
-
-    const id = Number(req.params.id);
-
-    const task = db
-        .prepare("SELECT * FROM tasks WHERE id = ?")
-        .get(id);
-
-    if (!task) {
-        return res.status(404).json({
-            error: "Task not found"
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({
+            error: "Database error",
         });
     }
+});
 
-    res.json(task);
+app.get("/tasks/:id", async (req, res) => {
+    try {
+        const id = Number(req.params.id);
 
+        const result = await pool.query(
+            "SELECT * FROM tasks WHERE id = $1",
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({
+            error: "Database error"
+        });
+    }
 });
 
 app.post("/tasks", (req, res) => {
