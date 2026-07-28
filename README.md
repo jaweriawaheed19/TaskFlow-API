@@ -2,11 +2,12 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)
 ![Swagger UI](https://img.shields.io/badge/Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-A RESTful Task API built with **Node.js**, **Express.js**, and **SQLite** that supports full CRUD (Create, Read, Update, Delete) operations with persistent database storage. The project demonstrates REST API fundamentals, SQL queries, HTTP methods, request validation, and interactive API documentation using **Swagger UI**.
+A RESTful Task API built with **Node.js**, **Express.js**, **PostgreSQL**, and **Docker Compose**. The API supports full CRUD (Create, Read, Update, Delete) operations with persistent database storage. The project demonstrates REST API development, SQL queries, Docker containerization, environment configuration, and interactive API documentation using **Swagger UI**.
 
 
 ## Table of Contents
@@ -16,7 +17,7 @@ A RESTful Task API built with **Node.js**, **Express.js**, and **SQLite** that s
 - [Installation](#installation)
 - [Database](#database)
 - [API Endpoints](#api-endpoints)
-- [Example curl Request](#example-curl-request)
+- [Example curl](#example-curl)
 - [Swagger UI](#swagger-ui)
 - [Project Structure](#project-structure)
 - [HTTP Status Codes](#http-status-codes)
@@ -28,7 +29,10 @@ A RESTful Task API built with **Node.js**, **Express.js**, and **SQLite** that s
 
 - Full CRUD (Create, Read, Update, Delete) operations
 - RESTful API endpoints
-- SQLite database for persistent task storage
+- PostgreSQL database for persistent task storage
+- Dockerized application using Docker Compose
+- Persistent PostgreSQL volume
+- One-command startup with Docker Compose
 - Automatic database and table creation
 - Automatic seeding of **three** example tasks
 - SQL-based CRUD operations
@@ -44,10 +48,18 @@ A RESTful Task API built with **Node.js**, **Express.js**, and **SQLite** that s
 - **Node.js** – JavaScript runtime environment
 - **Express.js** – Backend web framework
 - **JavaScript (ES6)** – Programming language
-- **SQLite** – Lightweight embedded SQL database
-- **better-sqlite3** – SQLite driver for Node.js
+- **PostgreSQL** – Relational database
+- **pg** – PostgreSQL client for Node.js
+- **Docker** – Containerization platform
+- **Docker Compose** – Multi-container application management
 - **OpenAPI 3.0** – API specification
 - **Swagger UI Express** – Interactive API documentation
+
+
+## Prerequisites
+
+- Docker Desktop
+- Git
 
 
 ## Installation
@@ -64,74 +76,104 @@ git clone https://github.com/jaweriawaheed19/TaskFlow-API.git
 cd TaskFlow-API
 ```
 
-### 3. Install dependencies
+### 3. Copy the environment file
 
-```bash
-npm install
+Copy `.env.example` to `.env`.
+
+**Windows**
+
+```cmd
+copy .env.example .env
 ```
 
-This installs all required project dependencies, including **better-sqlite3**.
-
-### 4. Start the server
+**Linux/macOS**
 
 ```bash
-npm start
+cp .env.example .env
 ```
 
-On first startup the application automatically:
+### 4. Start the application
 
-- Creates `tasks.db`
-- Creates the `tasks` table if it does not already exist
-- Seeds three example tasks if the database is empty
+```bash
+docker compose up
+```
 
-The server starts on:
+This command automatically:
+
+- Builds the API container
+- Starts the PostgreSQL database
+- Connects the API to the database
+- Creates the database tables (if they don't exist)
+- Seeds the database with example tasks (if empty)
+
+The API will be available at:
 
 ```text
 http://localhost:3000
 ```
 
-Swagger UI is available at:
+Swagger UI:
 
 ```text
 http://localhost:3000/docs
 ```
 
-Repository:
+### 5. Verify the API
 
-```text
-https://github.com/jaweriawaheed19/TaskFlow-API
+Run:
+
+```bash
+curl -i http://localhost:3000/tasks
 ```
+
+If you receive **HTTP/1.1 200 OK**, the API and PostgreSQL database are running successfully.
+
+No manual PostgreSQL installation or database setup is required.
+
 
 ## Database
 
-The project uses **SQLite** because it is lightweight, serverless, requires zero configuration, and stores all data in a single file. Unlike the previous in-memory implementation, data now persists even after the server restarts.
+The project uses **PostgreSQL** running inside a Docker container.
 
-### Database File
+Database connection settings are configured through the `.env` file:
 
-- The database file is named `tasks.db`.
-- It is created automatically the first time the application starts.
-- The application automatically creates the `tasks` table if it does not already exist.
-- Three example tasks are seeded only when the table is empty.
-- The database file is typically added to `.gitignore` so each new clone starts with a fresh database that is created automatically.
-
-## SQLite Database
-
-The screenshot below shows the project database opened in **DB Browser for SQLite**.
-
-![SQLite Database](screenshots/sqlite-browser.png)
-
-## Example SQL Query
-
-The following query was executed during Stage 4 to display all completed tasks.
-
-```sql
-SELECT * FROM tasks WHERE done = 1;
+```env
+DATABASE_URL=postgres://username:password@localhost:5432/database_name
 ```
 
-**Result:** The query returned every task whose `done` value was `1`, allowing only completed tasks to be displayed.
+See `.env.example` for the complete configuration.
+
+When the application starts, it automatically:
+
+- Creates the `tasks` table if it does not already exist.
+- Seeds the database with example tasks if the table is empty.
+- Connects to PostgreSQL using the `pg` package.
+
+The PostgreSQL data is stored in a Docker volume, so tasks remain available even after stopping and restarting the containers with:
+
+```bash
+docker compose down
+docker compose up
+```
+
+The application uses PostgreSQL for persistent task storage.
+
+### Tables
+
+![Database Tables](screenshots/database-tables.png)
+
+### Tasks Data
+
+![Tasks Table](screenshots/tasks-table.png)
 
 
 ## API Endpoints
+
+Base URL:
+
+```text
+http://localhost:3000
+```
 
 | Method | Endpoint | Description | Possible Responses |
 |:------:|----------|-------------|--------------------|
@@ -142,27 +184,41 @@ SELECT * FROM tasks WHERE done = 1;
 | POST | `/tasks` | Creates a new task | 201 Created, 400 Bad Request |
 | PUT | `/tasks/{id}` | Updates an existing task | 200 OK, 400 Bad Request, 404 Not Found |
 | DELETE | `/tasks/{id}` | Deletes a task | 204 No Content, 404 Not Found |
+| GET | `/docs` | Opens the Swagger UI documentation | 200 OK |
 
 
-## Example curl Request
+## Example curl
 
-The following command creates a new task.
+Retrieve all tasks:
 
 ```bash
-curl -i -X POST http://localhost:3000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Buy milk\"}"
+curl -i http://localhost:3000/tasks
 ```
 
-Successful Response:
+Example response:
 
 ```http
-HTTP/1.1 201 Created
+HTTP/1.1 200 OK
+X-Powered-By: Express
 Content-Type: application/json; charset=utf-8
 
-{
-  "id": 4,
-  "title": "Buy milk",
-  "done": false
-}
+[
+  {
+    "id": 1,
+    "title": "Learn Express",
+    "done": false
+  },
+  {
+    "id": 2,
+    "title": "Build Task API",
+    "done": false
+  },
+  {
+    "id": 3,
+    "title": "Test API Endpoints",
+    "done": true
+  }
+]
 ```
 
 
@@ -193,19 +249,22 @@ The following screenshot demonstrates creating a new task using Swagger UI's **T
 TaskFlow-API/
 ├── ai-version/
 ├── screenshots/
-│   ├── sqlite-db-browser.png
+│   ├── database-tables.png
+│   ├── tasks-table.png
 │   ├── swagger-post-success.png
 │   └── swagger-ui-overview.png
+├── .dockerignore
 ├── database.js
+├── Dockerfile
+├── compose.yaml
 ├── openapi.json
 ├── package.json
 ├── package-lock.json
 ├── server.js
+├── .env.example
 ├── .gitignore
-├── README.md
-└── tasks.db (created automatically)
+└── README.md
 ```
-> *`tasks.db` is created automatically when the application starts and is usually ignored by Git.*
 
 
 ## HTTP Status Codes
