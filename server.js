@@ -6,6 +6,8 @@ const swaggerDocument = require("./openapi.json");
 
 const { pool, initializeDatabase } = require("./database");
 
+const supabase = require("./supabase");
+
 const app = express();
 
 app.use(express.json());
@@ -163,6 +165,10 @@ initializeDatabase()
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
+
+            if (supabase) {
+                console.log("Connected to Supabase");
+            }
         });
     })
     .catch((err) => {
