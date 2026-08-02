@@ -4,44 +4,63 @@
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 ![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)
 ![Swagger UI](https://img.shields.io/badge/Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-A RESTful Task API built with **Node.js**, **Express.js**, **PostgreSQL**, and **Docker Compose**. The API supports full CRUD (Create, Read, Update, Delete) operations with persistent database storage. The project demonstrates REST API development, SQL queries, Docker containerization, environment configuration, and interactive API documentation using **Swagger UI**.
+A RESTful Task API built with Node.js, Express.js, PostgreSQL, Supabase Authentication, JWT, Docker, and Swagger UI.
 
+The project started as a simple Task API and was extended with PostgreSQL persistence, Docker Compose, Supabase authentication, JWT verification, reusable authentication middleware, protected routes, logout, and bearer-token authentication in Swagger UI.
+
+---
 
 ## Table of Contents
 
 - [Features](#features)
 - [Technologies Used](#technologies-used)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Environment Variables](#environment-variables)
 - [Database](#database)
+- [Authentication](#authentication)
 - [API Endpoints](#api-endpoints)
-- [Example curl](#example-curl)
 - [Swagger UI](#swagger-ui)
 - [Project Structure](#project-structure)
 - [HTTP Status Codes](#http-status-codes)
-- [AI Rematch](#ai-rematch)
+- [Git and Security](#git-and-security)
 - [Author](#author)
 
+---
 
 ## Features
 
 - Full CRUD (Create, Read, Update, Delete) operations
 - RESTful API endpoints
 - PostgreSQL database for persistent task storage
+- SQL-based CRUD operations
 - Dockerized application using Docker Compose
 - Persistent PostgreSQL volume
 - One-command startup with Docker Compose
 - Automatic database and table creation
-- Automatic seeding of **three** example tasks
-- SQL-based CRUD operations
+- Automatic seeding of three example tasks
 - Data persists after server restarts
 - JSON request and response handling
 - Input validation with proper error handling
+- User signup with Supabase Authentication
+- User login with Supabase Authentication
+- JWT access token authentication
+- JWT token verification through Supabase
+- Reusable authentication middleware
+- Protected routes
+- User logout
+- Public and protected API endpoints
+- Bearer Token authentication in Swagger UI
 - Interactive API documentation using Swagger UI
-- Standard HTTP status codes (200, 201, 204, 400, 404)
+- OpenAPI 3.0 specification
+- Standard HTTP status codes
 
+---
 
 ## Technologies Used
 
@@ -52,15 +71,21 @@ A RESTful Task API built with **Node.js**, **Express.js**, **PostgreSQL**, and *
 - **pg** – PostgreSQL client for Node.js
 - **Docker** – Containerization platform
 - **Docker Compose** – Multi-container application management
+- **Supabase Auth** – User authentication and JWT issuing
+- **JWT** – Access-token based authentication
 - **OpenAPI 3.0** – API specification
 - **Swagger UI Express** – Interactive API documentation
+- **Git / GitHub** – Version control and project hosting
 
+---
 
 ## Prerequisites
 
 - Docker Desktop
 - Git
+- A Supabase project
 
+---
 
 ## Installation
 
@@ -76,7 +101,7 @@ git clone https://github.com/jaweriawaheed19/TaskFlow-API.git
 cd TaskFlow-API
 ```
 
-### 3. Copy the environment file
+### 3. Create the environment file
 
 Copy `.env.example` to `.env`.
 
@@ -92,71 +117,77 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-### 4. Start the application
+### 4. Configure the environment variables
+
+Open `.env` and provide the required values:
+
+```env
+DATABASE_URL=postgres://username:password@localhost:5432/database_name
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_key
+PORT=3000
+```
+
+The `SUPABASE_KEY` must be the Supabase **anon/public key**. The `service_role` key must never be placed in this project.
+
+### 5. Start the application
+
+Run the application with:
 
 ```bash
 docker compose up
 ```
 
-This command automatically:
-
-- Builds the API container
-- Starts the PostgreSQL database
-- Connects the API to the database
-- Creates the database tables (if they don't exist)
-- Seeds the database with example tasks (if empty)
-
-The API will be available at:
+This command starts the required services and runs the API on:
 
 ```text
 http://localhost:3000
 ```
 
-Swagger UI:
+Swagger UI is available at:
 
 ```text
 http://localhost:3000/docs
 ```
 
-### 5. Verify the API
+---
 
-Run:
+## Environment Variables
 
-```bash
-curl -i http://localhost:3000/tasks
-```
+The project uses environment variables for database and Supabase configuration.
 
-If you receive **HTTP/1.1 200 OK**, the API and PostgreSQL database are running successfully.
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL database connection |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_KEY` | Supabase anon/public API key |
+| `PORT` | Port used by the Express server |
 
-No manual PostgreSQL installation or database setup is required.
+The `.env` file contains the actual local configuration and is excluded from Git using `.gitignore`.
 
+A `.env.example` file is included in the repository with placeholder values so another developer can configure their own environment without receiving the project's secrets.
+
+---
 
 ## Database
 
-The project uses **PostgreSQL** running inside a Docker container.
+The project uses **PostgreSQL** for persistent task storage.
 
-Database connection settings are configured through the `.env` file:
-
-```env
-DATABASE_URL=postgres://username:password@localhost:5432/database_name
-```
-
-See `.env.example` for the complete configuration.
+The PostgreSQL database runs inside Docker and is connected to the API through the `pg` package.
 
 When the application starts, it automatically:
 
 - Creates the `tasks` table if it does not already exist.
 - Seeds the database with example tasks if the table is empty.
-- Connects to PostgreSQL using the `pg` package.
+- Connects to PostgreSQL using the configured database URL.
 
-The PostgreSQL data is stored in a Docker volume, so tasks remain available even after stopping and restarting the containers with:
+The PostgreSQL data is stored in a Docker volume, so tasks remain available after stopping and restarting the containers.
 
-```bash
-docker compose down
-docker compose up
+The database connection is configured through:
+
+```env
+DATABASE_URL=postgres://username:password@localhost:5432/database_name
 ```
-
-The application uses PostgreSQL for persistent task storage.
 
 ### Tables
 
@@ -166,61 +197,102 @@ The application uses PostgreSQL for persistent task storage.
 
 ![Tasks Table](screenshots/tasks-table.png)
 
+---
+
+## Authentication
+
+Authentication is handled by **Supabase Auth**.
+
+The application does not store passwords or hash passwords itself. User credentials are sent to Supabase, which manages authentication and issues JWT access tokens.
+
+The authentication flow is:
+
+```text
+Client
+   |
+   | Email + Password
+   v
+Supabase Auth
+   |
+   | JWT Access Token
+   v
+Client
+   |
+   | Authorization: Bearer <token>
+   v
+Express API
+   |
+   | Token verification
+   v
+Supabase
+   |
+   | Valid user
+   v
+Protected Route
+```
+
+### Authentication Features
+
+- User signup
+- User login
+- Access token generation
+- JWT verification
+- Reusable authentication middleware
+- Protected routes
+- User logout
+- Public routes
+- Bearer authentication in Swagger UI
+
+### Protected Routes
+
+Protected routes use the following HTTP header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+The authentication middleware extracts the token, verifies it with Supabase, and attaches the verified user to the request.
+
+If the token is missing or invalid, the API returns:
+
+```json
+{
+  "error": "Invalid or expired token"
+}
+```
+
+---
 
 ## API Endpoints
 
-Base URL:
+### Authentication and Protected Routes
 
-```text
-http://localhost:3000
-```
+These are the five authentication-related endpoints required by the assignment.
 
-| Method | Endpoint | Description | Possible Responses |
-|:------:|----------|-------------|--------------------|
-| GET | `/` | Returns basic information about the API | 200 OK |
-| GET | `/health` | Checks whether the server is running | 200 OK |
-| GET | `/tasks` | Returns all tasks | 200 OK |
-| GET | `/tasks/{id}` | Returns a task by its ID | 200 OK, 404 Not Found |
-| POST | `/tasks` | Creates a new task | 201 Created, 400 Bad Request |
-| PUT | `/tasks/{id}` | Updates an existing task | 200 OK, 400 Bad Request, 404 Not Found |
-| DELETE | `/tasks/{id}` | Deletes a task | 204 No Content, 404 Not Found |
-| GET | `/docs` | Opens the Swagger UI documentation | 200 OK |
+| Method | Endpoint | Description | Authentication |
+|:------:|----------|-------------|:---------------:|
+| POST | `/auth/signup` | Creates a new user account | No |
+| POST | `/auth/login` | Authenticates a user and returns access and refresh tokens | No |
+| POST | `/auth/logout` | Logs out the authenticated user | Yes |
+| GET | `/protected/profile` | Returns the authenticated user's profile information | Yes |
+| GET | `/public/info` | Returns publicly accessible information | No |
 
+### Additional Task API Endpoints
 
-## Example curl
+The original Task API functionality remains available.
 
-Retrieve all tasks:
+| Method | Endpoint | Description |
+|:------:|----------|-------------|
+| GET | `/` | Returns basic information about the API |
+| GET | `/health` | Checks whether the server is running |
+| GET | `/tasks` | Returns all tasks |
+| GET | `/tasks/{id}` | Returns a task by its ID |
+| POST | `/tasks` | Creates a new task |
+| PUT | `/tasks/{id}` | Updates an existing task |
+| DELETE | `/tasks/{id}` | Deletes a task |
+| GET | `/docs` | Opens the Swagger UI documentation |
 
-```bash
-curl -i http://localhost:3000/tasks
-```
-
-Example response:
-
-```http
-HTTP/1.1 200 OK
-X-Powered-By: Express
-Content-Type: application/json; charset=utf-8
-
-[
-  {
-    "id": 1,
-    "title": "Learn Express",
-    "done": false
-  },
-  {
-    "id": 2,
-    "title": "Build Task API",
-    "done": false
-  },
-  {
-    "id": 3,
-    "title": "Test API Endpoints",
-    "done": true
-  }
-]
-```
-
+---
 
 ## Swagger UI
 
@@ -230,217 +302,95 @@ Interactive API documentation is available at:
 http://localhost:3000/docs
 ```
 
-### API Overview
+Swagger UI provides an interactive interface for the API, including a **Try it out** feature.
 
-The following screenshot shows all available API endpoints documented in Swagger UI.
+The protected routes are configured with bearer-token authentication using the OpenAPI security scheme.
+
+The **Authorize** button allows an access token obtained from Supabase login to be provided once and reused when testing protected endpoints.
+
+### Swagger UI Overview
 
 ![Swagger UI Overview](screenshots/swagger-ui-overview.png)
 
-### Successful POST Request
+### Swagger Authentication
 
-The following screenshot demonstrates creating a new task using Swagger UI's **Try it out** feature.
+The protected routes display a lock icon when bearer authentication is configured.
 
-![Successful POST Request](screenshots/swagger-post-success.png)
+After selecting **Authorize** and providing a valid JWT, protected endpoints can be tested directly from Swagger UI.
 
+---
 
 ## Project Structure
 
 ```text
 TaskFlow-API/
-├── ai-version/
 ├── screenshots/
 │   ├── database-tables.png
 │   ├── tasks-table.png
 │   ├── swagger-post-success.png
 │   └── swagger-ui-overview.png
+├── middlewares/
+│   └── authMiddleware.js
 ├── .dockerignore
+├── .env.example
+├── .gitignore
+├── compose.yaml
 ├── database.js
 ├── Dockerfile
-├── compose.yaml
 ├── openapi.json
 ├── package.json
 ├── package-lock.json
 ├── server.js
-├── .env.example
-├── .gitignore
+├── supabase.js
 └── README.md
 ```
 
+---
 
 ## HTTP Status Codes
 
 | Status Code | Meaning |
 |-------------|---------|
 | **200 OK** | Request completed successfully |
-| **201 Created** | A new task was created successfully |
-| **204 No Content** | A task was deleted successfully |
-| **400 Bad Request** | The request was invalid (e.g., missing title or no fields to update) |
-| **404 Not Found** | The requested task does not exist |
+| **201 Created** | A new resource was created successfully |
+| **204 No Content** | Request completed successfully with no response body |
+| **400 Bad Request** | The request contains invalid or missing data |
+| **401 Unauthorized** | Authentication is required or the provided token is invalid |
+| **404 Not Found** | The requested resource does not exist |
 
+---
 
-## AI Rematch
+## Git and Security
 
-To evaluate how well AI could generate the same backend application, I wrote my own prompt and asked an AI assistant to build the Task API from scratch. The AI-generated implementation was kept in a separate `ai-version/` folder so that my original hand-built implementation remained unchanged.
+The project uses Git for version control.
 
-
-## Original Prompt
-
-```text
-Build a RESTful Task Management API using Node.js and Express.js.
-
-Requirements:
-
-- Store tasks in an in-memory array (no database or file storage).
-- Each task should have:
-  - id (integer)
-  - title (string)
-  - done (boolean)
-
-Implement the following endpoints:
-
-1. GET /
-   - Return API information including name, version, and available endpoints.
-
-2. GET /health
-   - Return a JSON response indicating the server is running.
-
-3. GET /tasks
-   - Return all tasks.
-
-4. GET /tasks/:id
-   - Return the requested task.
-   - If the task does not exist, return:
-     - HTTP 404
-     - JSON: { "error": "Task <id> not found" }
-
-5. POST /tasks
-   - Create a new task.
-   - The request body must contain a non-empty "title".
-   - New tasks should default to done: false.
-   - Return HTTP 201.
-   - If title is missing or empty, return HTTP 400 with a JSON error.
-
-6. PUT /tasks/:id
-   - Allow updating title and/or done.
-   - Return HTTP 200 with the updated task.
-   - Return HTTP 400 if no valid fields are provided.
-   - Return HTTP 404 if the task does not exist.
-
-7. DELETE /tasks/:id
-   - Delete a task.
-   - Return HTTP 204.
-   - Return HTTP 404 if the task does not exist.
-
-Additional requirements:
-
-- Use express.json().
-- Use proper REST API status codes.
-- Return JSON responses only.
-- Create an OpenAPI 3.0 specification.
-- Serve Swagger UI at /docs using swagger-ui-express.
-- Organize the code clearly and keep it beginner-friendly.
-```
-
-
-## AI vs Me
-
-### What the AI Did Better
-
-- Generated a modular project structure by separating routing, data storage, and server configuration into multiple files, improving maintainability and scalability.
-- Created a more detailed OpenAPI specification with reusable schemas and better endpoint organization, resulting in a cleaner Swagger UI.
-- Used `process.env.PORT || 3000`, allowing the server to run on different ports without modifying the source code.
-- Added extra information such as `uptime` and `timestamp` to the `/health` endpoint.
-
-### What the AI Got Wrong or Quietly Ignored
-
-- Renamed the API from **Task API** to **Task Management API**, even though my prompt did not ask for a different name.
-- Returned additional fields (`uptime` and `timestamp`) in the `/health` endpoint instead of the simple `{ "status": "ok" }` response used in my implementation.
-- Initialized the API with a different set of sample tasks. Since my prompt only specified having an in-memory task list and did not define the exact sample data, the AI made its own assumptions.
-- Added implementation details and extra features that were not explicitly requested, making the solution different from the intended minimal specification.
-
-### What My Prompt Forgot to Specify
-
-While comparing both implementations, I realized that my prompt left several implementation details open to interpretation:
-
-- The exact API name.
-- The exact response format for the `/health` endpoint.
-- Whether the project should use a single-file or modular structure.
-- The exact sample task data.
-- The desired level of detail for the OpenAPI documentation.
-
-Because these details were not specified, the AI made reasonable implementation decisions that differed from my hand-built version.
-
-
-## Improved Prompt
+The authentication work was completed incrementally through separate stage commits, including:
 
 ```text
-Build a RESTful Task API using Node.js and Express.js.
-
-Requirements:
-
-General
-- Name the API exactly "Task API".
-- Keep the implementation beginner-friendly.
-- Store tasks in an in-memory array only. Do not use a database or file storage.
-- Initialize the API with exactly three sample tasks.
-- Use express.json() middleware.
-- Return JSON responses only.
-
-Endpoints
-
-GET /
-- Return the API name, version and available endpoints.
-
-GET /health
-- Return exactly:
-{
-  "status": "ok"
-}
-
-GET /tasks
-- Return all tasks.
-- Status code: 200.
-
-GET /tasks/:id
-- Return the requested task.
-- If the task does not exist, return HTTP 404 with:
-{
-  "error": "Task <id> not found"
-}
-
-POST /tasks
-- Accept a JSON body containing a non-empty "title".
-- New tasks must default to done: false.
-- Return HTTP 201.
-- Missing or empty title must return HTTP 400 with a JSON error.
-
-PUT /tasks/:id
-- Allow updating title and/or done.
-- Return HTTP 200 with the updated task.
-- Return HTTP 400 if no valid fields are supplied.
-- Return HTTP 404 if the task does not exist.
-
-DELETE /tasks/:id
-- Delete the requested task.
-- Return HTTP 204.
-- Return HTTP 404 if the task does not exist.
-
-Swagger
-- Create an OpenAPI 3.0 specification.
-- Serve Swagger UI at /docs using swagger-ui-express.
-- Keep the implementation close to the requested functionality without adding extra response fields or unnecessary features.
+Stage 0: setup server and supabase client
+Stage 1: signup and login routes working
+Stage 2: public route and unverified protected route
+Stage 3: profile route token verification
+Stage 4: auth middleware and logout endpoint
+Stage 5: Swagger UI documentation with bearer auth
 ```
 
+The `.env` file is intentionally excluded from Git.
 
-## Rematch Result
+```text
+.env
+```
 
-This exercise demonstrated that AI-generated code is only as good as the specification it receives. Building the project manually first allowed me to review the generated code critically, identify AI assumptions, and improve my prompt to produce a solution that more closely matched my intended implementation.
+Only `.env.example` is committed so that other developers can see the required environment variable names without exposing actual credentials.
 
+**Never commit Supabase keys, database passwords, or other secrets to GitHub.**
+
+---
 
 ## Author
 
 *Jaweria Waheed Satti*
 
-- Student – BS Computer Science  
-- [LinkedIn](https://www.linkedin.com/in/jaweriasatti19)  
+- Student – BS Computer Science
+- [LinkedIn](https://www.linkedin.com/in/jaweriasatti19)
 - [Email](mailto:jaweriasatti19@gmail.com)
