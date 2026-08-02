@@ -65,6 +65,108 @@
       }
     },
 
+    "/auth/signup": {
+  "post": {
+    "summary": "Register a new user",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "User created"
+      },
+      "400": {
+        "description": "Invalid request"
+      }
+    }
+  }
+},
+
+"/auth/login": {
+  "post": {
+    "summary": "Login user",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Login successful"
+      },
+      "401": {
+        "description": "Invalid credentials"
+      }
+    }
+  }
+},
+
+"/protected/profile": {
+  "get": {
+    "summary": "Get logged-in user's profile",
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Profile returned"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  }
+},
+
+"/auth/logout": {
+  "post": {
+    "summary": "Logout current user",
+    "security": [
+      {
+        "BearerAuth": []
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Logged out"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  }
+},
+
     "/tasks": {
       "get": {
         "summary": "Returns all tasks",
@@ -324,6 +426,16 @@
             }
           }
         }
+      }
+    }
+  },
+
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
